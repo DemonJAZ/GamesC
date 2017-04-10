@@ -2,8 +2,40 @@
 #include <cstdlib>
 #include <time.h>
 #include <curses.h>
-#include <ncurses.h>
+#include <stdio.h>
+#include <termios.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 using namespace std;
+int kbhit(void)
+{
+  struct termios oldt, newt;
+  int ch;
+  int oldf;
+
+  tcgetattr(STDIN_FILENO, &oldt);
+  newt = oldt;
+  newt.c_lflag &= ~(ICANON | ECHO);
+  tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+  oldf = fcntl(STDIN_FILENO, F_GETFL, 0);
+  fcntl(STDIN_FILENO, F_SETFL, oldf | O_NONBLOCK);
+
+  ch = getchar();
+
+  tcsetattr(STDIN_FILENO, TCSANOW, &oldt);
+  fcntl(STDIN_FILENO, F_SETFL, oldf);
+
+  if(ch != EOF)
+  {
+    ungetc(ch, stdin);
+    return 1;
+  }
+
+  return 0;
+}
+
+
 enum dir { STOP=0 , LEFT = 1 , UPLEFT = 2 , DOWNLEFT = 3 , RIGHT = 4 , UPRIGHT = 5 , DOWNRIGHT = 6  };
 
 /* Functionality of the Ball*/
@@ -219,7 +251,10 @@ public:
         for (int i = 0; i < width+2; ++i)
             cout<<"🀠";
         cout<<endl;
+
+        cout<<"PLAYER1 : "<<score1 <<" "<<"PLAYER2 : "<<score2<<endl;
     }
+
 
     void Input()
     {
@@ -232,9 +267,10 @@ public:
         int player2x = player2->getX();
         int player2y = player2->getY();
 
+
         if(kbhit())
         {
-            char current = getch();
+            char current = getchar();
             if( current == up1)
             {
                 if(player1y > 0)
@@ -266,7 +302,7 @@ public:
             }
             if(current=='q')
             {
-                quit =true;
+                quit = true;
             }
         }
     }
@@ -315,9 +351,11 @@ public:
     {
         while (!quit)
         {
+            system("clear");
             Draw();
             Input();
             Logic();
+            usleep(10000);
         }
     }
 
@@ -327,7 +365,7 @@ public:
 
 
 int main(int argc, char const *argv[]) {
-   srand(time(0));
+  srand(time(0));
   GameManager g(80,20);
   g.Run();
   return 0;
