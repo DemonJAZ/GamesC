@@ -70,7 +70,8 @@ public:
     {
         direction = (dir)((rand()%6)+1);
     }
-
+    inline void IncY() { y+=3; };
+    inline void DecY() { y-=3; };
     inline int getX() { return x; }
     inline int getY() { return y; }
     inline dir getDirection() { return direction; }
@@ -320,15 +321,33 @@ public:
         for (int i = 0; i < 4; ++i)
         {
             if(ballx == player1x+1)
+            {
                 if(bally == player1y+i)
-                    ping->changeDirection((dir)((rand()%3)+4));
+                {
+                        ping->changeDirection((dir)((rand()%3)+4));
+                        if(rand()%2)
+                            ping->IncY();
+                        else
+                            ping->DecY();
+                }
+
+
+            }
+
         }
         //right pad
         for (int i = 0; i < 4; ++i)
         {
             if(ballx == player2x-1)
                 if(bally == player2y+i)
+                {
                     ping->changeDirection((dir)((rand()%3)+1));
+                    if(rand()%2)
+                        ping->IncY();
+                    else
+                        ping->DecY();
+                }
+
         }
 
         //bottom wall
@@ -344,6 +363,7 @@ public:
         //right wall
         if(ballx == 0)
             scoreUp(player2);
+
 
     }
 
