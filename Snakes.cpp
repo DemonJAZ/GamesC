@@ -7,7 +7,8 @@
 #include <fcntl.h>
 using namespace std;
 
-
+char wall = '#';
+char snake = 'O';
 int kbhit(void)
 {
   struct termios oldt, newt;
@@ -49,7 +50,7 @@ struct snakeLength
 };
 
 enum Dir { STOP=0 , UP=1 , DOWN = 2 , LEFT = 3 , RIGHT= 4 };
-
+bool fruit = false;
 class Snake
 {
 public:
@@ -93,13 +94,13 @@ void initializeMap(char **map,int mapWidth,int mapHeight)
     }
     for (int i = 0; i < mapWidth; ++i)
     {
-        map[0][i]='#';
-        map[mapHeight-1][i]='#';
+        map[0][i]=wall;
+        map[mapHeight-1][i]=wall;
     }
     for (int i = 0; i < mapHeight; ++i)
     {
-        map[i][0]='#';
-        map[i][mapWidth-1]='#';
+        map[i][0]=wall;
+        map[i][mapWidth-1]=wall;
     }
 }
 
@@ -111,7 +112,7 @@ void draw(Snake viper,char **map,int mapWidth , int mapHeight)
     trav = viper.sl;
     while(trav!=NULL)
     {
-        map[trav->x][trav->y]='@';
+        map[trav->x][trav->y]=snake;
         trav=trav->next;
     }
     for (int i = 0; i < mapHeight; ++i)
@@ -134,7 +135,6 @@ void input(Snake &viper)
         {
             if(viper.SnakeDir!=DOWN && viper.SnakeDir!=UP)
             {
-                viper.x--;
                 viper.SnakeDir=UP;
             }
         }
@@ -142,7 +142,6 @@ void input(Snake &viper)
         {
             if(viper.SnakeDir!=UP && viper.SnakeDir!=DOWN)
             {
-                viper.x++;
                 viper.SnakeDir=DOWN;
             }
         }
@@ -150,7 +149,6 @@ void input(Snake &viper)
         {
             if(viper.SnakeDir!=RIGHT && viper.SnakeDir!=LEFT)
             {
-                viper.y--;
                 viper.SnakeDir=LEFT;
             }
         }
@@ -159,7 +157,6 @@ void input(Snake &viper)
         {
             if(viper.SnakeDir!=LEFT && viper.SnakeDir!=RIGHT)
             {
-                viper.y++;
                 viper.SnakeDir=RIGHT;
             }
         }
@@ -172,7 +169,7 @@ void Logic(Snake &viper,int mapWidth,int mapHeight)
 {
     if(viper.x<=0 || viper.x>= mapHeight-1 || viper.y<=0 || viper.y>= mapWidth)
     {
-        system("clear");
+        cout<<endl<<endl;
         cout<<"*************** GAME OVER *****************"<<endl;
         exit(0);
     }
@@ -193,6 +190,7 @@ void Logic(Snake &viper,int mapWidth,int mapHeight)
     default:
         break;
     }
+
 }
 
 void UpdateSnake(Snake &viper)
@@ -223,14 +221,15 @@ int main(int argc, char* argv[])
     }
     Snake viper(mapWidth,mapHeight);
 
-    while(1){
+    while(1)
+    {
         system("clear");
         initializeMap(map,mapWidth,mapHeight);
-        draw(viper,map,mapWidth,mapHeight);
-        input(viper);
-        Logic(viper,mapWidth,mapHeight);
         UpdateSnake(viper);
-        usleep(50000);
+        draw(viper,map,mapWidth,mapHeight);
+        Logic(viper,mapWidth,mapHeight);
+        input(viper);
+        usleep(90000);
 
     }
 
