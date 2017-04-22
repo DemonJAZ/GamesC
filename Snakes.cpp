@@ -170,7 +170,7 @@ void input(Snake &viper)
     }
 }
 
-void Logic(Snake &viper,int mapWidth,int mapHeight,struct Fruit &fruit , bool &spawnfruit , int &fruitTimer)
+void Logic(Snake &viper,int mapWidth,int mapHeight,struct Fruit &fruit , bool &spawnfruit , int &fruitTimer ,int &s)
 {
     if(viper.x<=0 || viper.x>= mapHeight-1 || viper.y<=0 || viper.y>= mapWidth-1)
     {
@@ -198,6 +198,7 @@ void Logic(Snake &viper,int mapWidth,int mapHeight,struct Fruit &fruit , bool &s
 
     if(fruit.x == viper.x && fruit.y == viper.y)
     {
+        s+=10;
         struct snakeLength *newHead;
         newHead = new snakeLength(0,0);
         switch (viper.SnakeDir)
@@ -286,6 +287,7 @@ int main(int argc, char* argv[])
     int fruitTimer = 0;
     bool spawnfruit = false;
     Fruit fruit;
+    int Score=0;
     while(1)
     {
         system("clear");
@@ -304,7 +306,8 @@ int main(int argc, char* argv[])
             map[fruit.x][fruit.y]=fruitSymbol;
         }
         draw(viper,map,mapWidth,mapHeight);
-        Logic(viper,mapWidth,mapHeight,fruit,spawnfruit,fruitTimer);
+        cout<<"SCORE -- "<<Score<<endl;
+        Logic(viper,mapWidth,mapHeight,fruit,spawnfruit,fruitTimer,Score);
         input(viper);
         usleep(60000);
 
