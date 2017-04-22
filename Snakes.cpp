@@ -7,8 +7,10 @@
 #include <fcntl.h>
 using namespace std;
 
-char wall = '#';
-char snake = 'O';
+string wall = "🁢";
+string snake = "◉";
+string fruit = "♥︎";
+bool spawnfruit;
 int kbhit(void)
 {
   struct termios oldt, newt;
@@ -49,8 +51,12 @@ struct snakeLength
     }
 };
 
+struct Fruit{
+        int x;
+        int y;
+};
+
 enum Dir { STOP=0 , UP=1 , DOWN = 2 , LEFT = 3 , RIGHT= 4 };
-bool fruit = false;
 class Snake
 {
 public:
@@ -77,7 +83,7 @@ public:
 };
 
 
-void initializeMap(char **map,int mapWidth,int mapHeight)
+void initializeMap(string **map,int mapWidth,int mapHeight)
 {
     system("clear");
     for (int i = 0; i < 40; ++i)
@@ -106,7 +112,7 @@ void initializeMap(char **map,int mapWidth,int mapHeight)
 
 
 
-void draw(Snake viper,char **map,int mapWidth , int mapHeight)
+void draw(Snake viper,string **map,int mapWidth , int mapHeight)
 {
     struct snakeLength *trav;
     trav = viper.sl;
@@ -165,9 +171,9 @@ void input(Snake &viper)
     }
 }
 
-void Logic(Snake &viper,int mapWidth,int mapHeight)
+void Logic(Snake &viper,int mapWidth,int mapHeight,struct Fruit &fruit , bool &spawnfruit , int &fruitTimer)
 {
-    if(viper.x<=0 || viper.x>= mapHeight-1 || viper.y<=0 || viper.y>= mapWidth)
+    if(viper.x<=0 || viper.x>= mapHeight-1 || viper.y<=0 || viper.y>= mapWidth-1)
     {
         cout<<endl<<endl;
         cout<<"*************** GAME OVER *****************"<<endl;
@@ -191,6 +197,36 @@ void Logic(Snake &viper,int mapWidth,int mapHeight)
         break;
     }
 
+    if(fruit.x == viper.x && fruit.y == viper.y)
+    {
+        struct snakeLength *newHead;
+        newHead = new snakeLength(0,0);
+        switch (viper.SnakeDir)
+        {
+        case UP:
+            newHead->x = viper.x-1;
+            newHead->y = viper.y;
+            break;
+        case DOWN:
+            newHead->x = viper.x+1;
+            newHead->y = viper.y;
+            break;
+        case LEFT:
+            newHead->x = viper.x;
+            newHead->y = viper.y-1;
+            break;
+        case RIGHT:
+            newHead->x = viper.x;
+            newHead->y = viper.y+1;
+            break;
+        default:
+            break;
+        }
+        newHead->next = viper.sl;
+        viper.sl = newHead;
+        spawnfruit = false;
+        fruitTimer = 0;
+    }
 }
 
 void UpdateSnake(Snake &viper)
@@ -210,26 +246,65 @@ void UpdateSnake(Snake &viper)
     delete(del);
 }
 
+void generateFruit(string **map, int mapWidth,int mapHeight,Snake &viper,struct Fruit &fruit )
+{
+    fruit.x = (rand()%(mapHeight-8))+1;
+    fruit.y = (rand()%(mapWidth-8))+1;
+    bool isThere=false;
+    struct snakeLength *trav;
+
+    do{
+        trav = viper.sl;
+        while(trav!=NULL)
+        {
+            if(trav->x == fruit.x || trav->y == fruit.y)
+                isThere=true;
+            else
+                isThere=false;
+
+            trav=trav->next;
+        }
+    }while(isThere);
+}
+
 int main(int argc, char* argv[])
 {
     int mapWidth=100,mapHeight=30;
-    char **map;
-    map = new char*[mapHeight];
+     srand(time(0));
+    string **map;
+    map = new string*[mapHeight];
     for (int i = 0; i < mapHeight; ++i)
     {
-        map[i]=new char[mapWidth];
+        map[i]=new string[mapWidth];
     }
     Snake viper(mapWidth,mapHeight);
-
+    int fruitTimer = 0;
+    spawnfruit = false;
+    Fruit fruit;
     while(1)
     {
+
+
         system("clear");
+        if(fruitTimer==100)
+        {
+            spawnfruit = true;
+            generateFruit(map,mapWidth,mapHeight,viper,fruit);
+            fruitTimer++;
+        }
+        if(fruitTimer<100)
+            fruitTimer++;
+
         initializeMap(map,mapWidth,mapHeight);
         UpdateSnake(viper);
+        if(spawnfruit)
+        {
+            map[fruit.x][fruit.y]="♥︎";
+        }
         draw(viper,map,mapWidth,mapHeight);
-        Logic(viper,mapWidth,mapHeight);
+        Logic(viper,mapWidth,mapHeight,fruit,spawnfruit,fruitTimer);
         input(viper);
-        usleep(90000);
+        usleep(60000);
 
     }
 
