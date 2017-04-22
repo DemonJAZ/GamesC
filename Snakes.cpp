@@ -7,10 +7,9 @@
 #include <fcntl.h>
 using namespace std;
 
-string wall = "🁢";
-string snake = "◉";
-string fruit = "♥︎";
-bool spawnfruit;
+char wall = '#';
+char snake = '@';
+char fruitSymbol = '*';
 int kbhit(void)
 {
   struct termios oldt, newt;
@@ -83,7 +82,7 @@ public:
 };
 
 
-void initializeMap(string **map,int mapWidth,int mapHeight)
+void initializeMap(char **map,int mapWidth,int mapHeight)
 {
     system("clear");
     for (int i = 0; i < 40; ++i)
@@ -112,7 +111,7 @@ void initializeMap(string **map,int mapWidth,int mapHeight)
 
 
 
-void draw(Snake viper,string **map,int mapWidth , int mapHeight)
+void draw(Snake viper,char **map,int mapWidth , int mapHeight)
 {
     struct snakeLength *trav;
     trav = viper.sl;
@@ -246,22 +245,28 @@ void UpdateSnake(Snake &viper)
     delete(del);
 }
 
-void generateFruit(string **map, int mapWidth,int mapHeight,Snake &viper,struct Fruit &fruit )
+
+
+void generateFruit (char **map, int mapWidth,int mapHeight,Snake &viper,struct Fruit &fruit )
 {
-    fruit.x = (rand()%(mapHeight-8))+1;
-    fruit.y = (rand()%(mapWidth-8))+1;
     bool isThere=false;
     struct snakeLength *trav;
 
     do{
+        fruit.x = (rand()%(mapHeight-2))+1;
+        fruit.y = (rand()%(mapWidth-2))+1;
         trav = viper.sl;
         while(trav!=NULL)
         {
             if(trav->x == fruit.x || trav->y == fruit.y)
-                isThere=true;
+            {
+                isThere = true;
+                break;
+            }
             else
+            {
                 isThere=false;
-
+            }
             trav=trav->next;
         }
     }while(isThere);
@@ -271,20 +276,18 @@ int main(int argc, char* argv[])
 {
     int mapWidth=100,mapHeight=30;
      srand(time(0));
-    string **map;
-    map = new string*[mapHeight];
+    char **map;
+    map = new char*[mapHeight];
     for (int i = 0; i < mapHeight; ++i)
     {
-        map[i]=new string[mapWidth];
+        map[i]=new char[mapWidth];
     }
     Snake viper(mapWidth,mapHeight);
     int fruitTimer = 0;
-    spawnfruit = false;
+    bool spawnfruit = false;
     Fruit fruit;
     while(1)
     {
-
-
         system("clear");
         if(fruitTimer==100)
         {
@@ -294,12 +297,11 @@ int main(int argc, char* argv[])
         }
         if(fruitTimer<100)
             fruitTimer++;
-
         initializeMap(map,mapWidth,mapHeight);
         UpdateSnake(viper);
         if(spawnfruit)
         {
-            map[fruit.x][fruit.y]="♥︎";
+            map[fruit.x][fruit.y]=fruitSymbol;
         }
         draw(viper,map,mapWidth,mapHeight);
         Logic(viper,mapWidth,mapHeight,fruit,spawnfruit,fruitTimer);
