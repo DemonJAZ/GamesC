@@ -4,10 +4,8 @@ https://www.youtube.com/watch?v=y8QL62SDlcQ
 */
 
 #include <iostream>
-#include <cstdlib>
 #include <time.h>
-#include <curses.h>
-#include <stdio.h>
+//for kbhit
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -382,7 +380,7 @@ public:
             Draw();
             Input();
             Logic();
-            usleep(10000);
+            usleep(20000);
         }
     }
 

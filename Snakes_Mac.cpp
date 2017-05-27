@@ -2,10 +2,9 @@
    #SelfMade
 */
 #include <iostream>
-#include <curses.h>
+#include <time.h>
+//for kbhit
 #include <termios.h>
-#include <ncurses.h>
-#include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 using namespace std;
