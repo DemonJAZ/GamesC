@@ -1,5 +1,6 @@
 #include <iostream>
 #include <time.h>
+#include <thread>
 //for kbhit
 #include <termios.h>
 #include <unistd.h>
@@ -99,7 +100,44 @@ void input(char **map,sprite &ball)
     {
         char keyPressed = getchar();
 
-        if(keyPressed == 'f')
+        if(keyPressed == ' ')
+        {
+            int current = ball.x;
+            while(ball.x > current-6)
+            {
+                initializeMap(map, ball);
+                input(map, ball);
+                draw(map, ball);
+                usleep(8000);
+                system("clear");
+                ball.x--;
+            }
+        }
+
+        if(keyPressed == 'a')
+        {
+            if(ball.y > 1)
+                ball.y--;
+        }
+
+        if(keyPressed == 'd')
+        {
+            if(ball.y < mapWidth-2)
+                ball.y++;
+        }
+
+        if(keyPressed == 'q')
+            exit(0);
+    }
+}
+
+/*void jumpLogic(char map[], sprite ball)
+{
+    if(kbhit())
+    {
+        char keyPressed = getchar();
+
+        if(keyPressed == ' ')
         {
             int current = ball.x;
             while(ball.x > current-6)
@@ -111,11 +149,10 @@ void input(char **map,sprite &ball)
                 ball.x--;
             }
         }
-
-        if(keyPressed == 'q')
-            exit(0);
     }
-}
+
+}*/
+
 int main(int argc, char* argv[])
 {
     char **map;
@@ -126,6 +163,8 @@ int main(int argc, char* argv[])
     }
 
     sprite ball(mapHeight-2,mapWidth/2);
+
+    //thread j(jumpLogic,map,ball);
     while(true)
     {
         initializeMap(map, ball);
@@ -135,7 +174,7 @@ int main(int argc, char* argv[])
         usleep(30000);
         system("clear");
     }
-
+    //j.join();
 
 
 
