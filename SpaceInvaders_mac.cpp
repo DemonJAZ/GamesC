@@ -71,6 +71,7 @@ public:
 struct blast{
     int x;
     int y;
+    bool hit;
 };
 
 enum Direction{LEFT=1,RIGHT=2};
@@ -101,7 +102,8 @@ void spaceDraw(ship *deathstar,char **space,invader *invaders,deque<blast>*fireb
     }
 
     for(auto itr = fireballs->begin() ; itr!=fireballs->end();itr++){
-        space[(*itr).x][(*itr).y] = '@';
+        if(!(*itr).hit)
+            space[(*itr).x][(*itr).y] = '@';
     }    
 
     for(int i = 0; i < HEIGHT; i++)
@@ -132,12 +134,12 @@ void input(ship *deathstar,deque<blast>*fireballs){
                 blast b;
                 b.x = deathstar->getX()-1;
                 b.y = deathstar->getY();
+                b.hit = false;
                 fireballs->push_back(b); 
                 break;   
             case 'q':
-                exit(0);   
-            default:
-                break;
+                exit(0);
+                break;  
         }
     }
 }
@@ -168,6 +170,21 @@ void logic(invader *invaders,Direction *dir,deque<blast>*fireballs){
         }
         itr++;
     }
+
+    for(int i = 0;i<INVADERSCOUNT ; i++){
+        auto itr = fireballs->begin();
+        while(itr!=fireballs->end()){
+            if(!(*itr).hit && !invaders[i].destroyed && (*itr).x == invaders[i].getx() && (*itr).y == invaders[i].gety() )
+            {
+                (*itr).hit = true;
+                invaders[i].destroyed = true;
+                i++;
+            }
+            itr++;
+        }
+    }
+
+    
       
 }
 
