@@ -40,67 +40,133 @@ int kbhit(void)
 
 enum blockType {BOX,BAR,FOUR,REV_FOUR,SEVEN,REV_SEVEN,BUTTON}; // determine which block to spawn
 
-struct blockStructure{
+struct Cell{ 
     int x;
     int y;
 };
 
 class Block
 {
-    vector<blockStructure> outline;
-    blockType b;
+    vector<Cell> block_outline;
+    blockType block_Type;
 public:
-    void setBlock(blockType b,int spawn){
-        this->b = b;
-        switch (b)      // build block array outline
+    void setBlock(blockType block_Type,int spawn){
+        this->block_Type = block_Type;
+        Cell cell;
+        switch (block_Type)      // build block array block_outline
         {
+            /*set quardinates of the Cell of each block as per the outline*/
             case BOX:
                 for(int i = 0; i < 2; i++)
                 {
 
                     for(int j = 0; j < 2; j++)
                     {
-                        blockStructure b;
-                        b.x = i+1;
-                        b.y = spawn+j;
-                        outline.push_back(b);
+                        
+                        cell.x = i+1;
+                        cell.y = spawn+j;
+                        block_outline.push_back(cell);
                     }
 
                 }
                 break;
             case BAR:
-                blockStructure b;
-                b.x = 1;
+                Cell cell;
+                cell.x = 1;
                 for (int i = 0; i < 4; ++i)
                 {
-                    b.y = spawn+i;
-                    outline.push_back(b);
+                    cell.y = spawn+i;
+                    block_outline.push_back(cell);
                 }
                 break;
+            
+            case FOUR:
+                cell.x = 1;
+                cell.y = spawn;
+                block_outline.push_back(cell);
+                cell.x+=1;
+                block_outline.push_back(cell);
+                cell.y+=1;
+                block_outline.push_back(cell);
+                cell.x+=1;
+                block_outline.push_back(cell);
+                break;
+
             default:
                 break;
         }
     }
+    /* movement of block*/
+    void moveLeft(){
+        for(int i = 0; i < block_outline.size(); i++)
+        {
+            block_outline[i].y--;
+        }            
+    }
+
+    void moveRight(){
+        for(int i = 0; i < block_outline.size(); i++)
+        {
+            block_outline[i].y++;
+        }  
+    }
 
     void drawBlock(char **playground){
-        for (int i = 0; i < outline.size(); ++i)
+        for (int i = 0; i < block_outline.size(); ++i)
         {
-            playground[outline[i].x][outline[i].y] = 'X';
+            playground[block_outline[i].x][block_outline[i].y] = 'X';
         }
     }
 
     bool moveDown(char **playground){      // move down the block if there is space else return false
-        if(playground[(outline[outline.size()-1].x)+1][outline[outline.size()-1].y] == ' '){
-            for (int i = 0; i < outline.size(); ++i)
+        bool can_move = true;
+        cout<<block_outline.size()<<endl;
+        /* check if space below each Cell of block is clear so it can move*/
+        switch (block_Type)
+        {
+            case BOX:
+                for(int i = 2; i < block_outline.size() ; i++)
+                {
+                    if(playground[(block_outline[i].x)+1][block_outline[i].y] != ' '){ 
+                        can_move = false;
+                        break;
+                    }            
+                }
+                break;
+            
+            case BAR:
+                for(int i = 0; i < block_outline.size() ; i++)
+                {
+                    if(playground[(block_outline[i].x)+1][block_outline[i].y] != ' '){ 
+                        can_move = false;
+                        break;
+                    }            
+                }
+                break;
+            
+            case FOUR:
+                    if(playground[(block_outline[3].x)+1][block_outline[3].y] != ' ' || playground[(block_outline[1].x)+1][block_outline[1].y] != ' '){ 
+                        can_move = false;
+                        break;
+                    }            
+                break;
+            default:
+                break;
+        }
+        /*update quadrinates of a block and empty */
+        if(can_move){
+            for (int i = 0; i < block_outline.size(); ++i)
             {
-                playground[outline[i].x][outline[i].y] = ' ';
-                outline[i].x++;
+                playground[block_outline[i].x][block_outline[i].y] = ' '; //empty previous quadinates.
+                block_outline[i].x++;
             }
             return true;
         }else{
-            outline.clear();
+            cout<<block_outline[3].x<<" "<<block_outline[3].y<<endl;
+            block_outline.clear();
             return false;
         }
+        
     }
 };
 
@@ -131,19 +197,23 @@ void logic(char **playground,bool &onRun,Block &block){
     }
 }
 
-void input(char **playground,bool &onRun){
-    if(onRun){
+void input(char **playground,bool &onRun,Block &block){
         if(kbhit()){
             char inputreceived = getchar();
             switch (inputreceived)
             {
-            case 'q': exit(0);
-                break;
-            default:
-                break;
+                case 'a':
+                    block.moveLeft();
+                    break;
+                case'd':
+                    block.moveRight();
+                    break;
+                case 'q': exit(0);
+                    break;
+                default:
+                    break;
             }
         }
-    }
 }
 
 int main(int argc, char* argv[])
@@ -175,16 +245,16 @@ int main(int argc, char* argv[])
     while(1){
         // reset block if not block is running
         if(!onRun){
-            int num = rand()%2; // generate random number to set block type
+            int num = rand()%3; // generate random number to set block type
             blockType a = (blockType)num;
-            int spawn = 1+rand()%(WIDTH-3); // genereate random spawn position
+            int spawn = (WIDTH/2) - 1; // genereate random spawn position
             block.setBlock(a,spawn);    // create outline of the block
             onRun = true;
         }
         draw(playground,onRun,block);
         logic(playground,onRun,block);
-        input(playground,onRun);
-        usleep(10000);
+        input(playground,onRun,block);
+        usleep(200000);
         system("clear");
     }
     return 0;
